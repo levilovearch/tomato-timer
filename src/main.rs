@@ -2,7 +2,7 @@ use clap::Parser;
 use crossterm::{event, ExecutableCommand};
 use std::sync::mpsc;
 use std::thread;
-use std::{error::Error, io, time::Duration};
+use std::{io, time::Duration};
 use terminal_fonts::to_block_string;
 use tui::{
     backend::CrosstermBackend,
@@ -12,6 +12,7 @@ use tui::{
     widgets::Paragraph,
     Terminal,
 };
+use anyhow::Result as Result;
 
 #[derive(Debug, Eq, PartialEq)]
 enum Status {
@@ -22,25 +23,28 @@ enum Status {
 impl Status {
     pub fn color(&self) -> Color {
         match self {
-            Status::Work => Color::Red,
-            Status::Break => Color::Green,
+            Self::Work => Color::Cyan,
+            Self::Break => Color::Magenta,
         }
     }
 }
 
 /// A tomato timer
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 struct Opts {
     /// Work timer in minutes
-    #[clap(short, long, default_value = "25")]
+    #[arg(short, long, default_value = "45")]
     work_time: u64,
     /// Break timer in minutes
-    #[clap(short, long, default_value = "5")]
+    #[arg(short, long, default_value = "15")]
     break_time: u64,
+    /// Repetition
+    #[arg(short, long, default_value = "1")]
+    repeats: u64,
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
     let mut status = Status::Work;
     let mut left_seconds = opts.work_time * 60;
@@ -129,7 +133,7 @@ fn notify(msg: &str) {
     });
 }
 
-fn quit(code: i32) -> Result<(), Box<dyn Error>> {
+fn quit(code: i32) -> Result<()> {
     let mut stdout = io::stdout();
     stdout.execute(crossterm::terminal::LeaveAlternateScreen)?;
     crossterm::terminal::disable_raw_mode()?;
