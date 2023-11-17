@@ -56,6 +56,9 @@ impl App {
                                 self.status = Status::Break;
                                 self.left_seconds = self.schedule.break_time * 60;
                                 notify("Your work time is up, take a break!");
+                                if self.schedule.repeats == 1 {
+                                    quit(0)?;
+                                }
                             }
                             Status::Break => {
                                 notify("Your break time is up!!");
