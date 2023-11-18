@@ -33,10 +33,7 @@ impl Status {
         }
     }
     pub fn pasued(&self) -> bool {
-        match self {
-            Self::Pause(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Pause(_))
     }
 }
 
