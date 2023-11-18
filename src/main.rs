@@ -1,32 +1,36 @@
+use anyhow::Result;
 use clap::Parser;
 use crossterm::{event, ExecutableCommand};
 use std::sync::mpsc;
 use std::thread;
 use std::{io, time::Duration};
-use tui::{
-    backend::CrosstermBackend,
-    style::Color,
-    Terminal,
-};
-use anyhow::Result as Result;
+use tui::{backend::CrosstermBackend, style::Color, Terminal};
 mod app;
 
 use app::App;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 enum Status {
     Work,
     Break,
+    Pause(Box<Status>),
 }
 
 impl Status {
-        pub fn color(&self) -> Color {
+    pub fn color(&self) -> Color {
         match self {
             Self::Work => Color::Cyan,
             Self::Break => Color::Magenta,
+            Self::Pause(_) => Color::Gray,
         }
     }
+    pub fn pasued(&self) -> bool {
+        match self {
+            Self::Pause(_) => true,
+            _ => false,
+        }
     }
+}
 
 /// A tomato timer
 #[derive(Parser, Debug)]
@@ -51,7 +55,7 @@ fn main() -> Result<()> {
     stdout.execute(crossterm::terminal::EnterAlternateScreen)?;
     stdout.execute(crossterm::cursor::Hide)?;
     let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    let terminal = Terminal::new(backend)?;
     let (tx, rx) = mpsc::channel();
 
     let tx_key_event: mpsc::Sender<Event<event::KeyEvent>> = tx.clone();
