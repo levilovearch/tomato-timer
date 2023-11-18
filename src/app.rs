@@ -8,14 +8,38 @@ use terminal_fonts::to_block_string;
 use tui::{
     backend::CrosstermBackend,
     layout::{Alignment, Rect},
-    style::Style,
+    style::{Style, Color},
     text::Text,
     widgets::Paragraph,
     Terminal,
 };
 
-use super::{Event, Opts, Status};
+use super::{Event, Opts};
 use anyhow::{Ok, Result};
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+enum Status {
+    Work,
+    Break,
+    Pause(Box<Status>),
+}
+
+impl Status {
+    pub fn color(&self) -> Color {
+        match self {
+            Self::Work => Color::Cyan,
+            Self::Break => Color::Magenta,
+            Self::Pause(_) => Color::Gray,
+        }
+    }
+    pub fn pasued(&self) -> bool {
+        match self {
+            Self::Pause(_) => true,
+            _ => false,
+        }
+    }
+}
+
 pub struct App {
     terminal: Terminal<CrosstermBackend<io::Stdout>>,
     left_seconds: u64,
