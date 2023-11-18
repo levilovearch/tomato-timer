@@ -8,7 +8,7 @@ use terminal_fonts::to_block_string;
 use tui::{
     backend::CrosstermBackend,
     layout::{Alignment, Rect},
-    style::{Style, Color},
+    style::{Color, Style},
     text::Text,
     widgets::Paragraph,
     Terminal,
@@ -134,14 +134,10 @@ impl App {
                 KeyEvent {
                     code: event::KeyCode::Char(' '),
                     ..
-                } => {
-                    match &self.status {
-                        Status::Pause(previous_state) => {self.status = *previous_state.clone()}
-                        _ => {
-                            self.status = Status::Pause(Box::new(self.status.clone()))
-                        }
-                    }
-                }
+                } => match &self.status {
+                    Status::Pause(previous_state) => self.status = *previous_state.clone(),
+                    _ => self.status = Status::Pause(Box::new(self.status.clone())),
+                },
                 _ => {}
             },
             Event::Tick => {
