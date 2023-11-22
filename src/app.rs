@@ -4,8 +4,7 @@ use crossterm::{
     event::{self, KeyEvent},
     ExecutableCommand,
 };
-use terminal_fonts::to_block_string;
-use tui::{
+use ratatui::{
     backend::CrosstermBackend,
     layout::{Alignment, Rect},
     style::{Color, Style},
@@ -13,6 +12,7 @@ use tui::{
     widgets::Paragraph,
     Terminal,
 };
+use terminal_fonts::to_block_string;
 
 use super::{Event, Opts};
 use anyhow::{Ok, Result};

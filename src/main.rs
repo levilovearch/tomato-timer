@@ -1,10 +1,10 @@
 use anyhow::Result;
 use clap::Parser;
 use crossterm::{event, ExecutableCommand};
+use ratatui::{backend::CrosstermBackend, Terminal};
 use std::sync::mpsc;
 use std::thread;
 use std::{io, time::Duration};
-use tui::{backend::CrosstermBackend, Terminal};
 mod app;
 use app::App;
 
