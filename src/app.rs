@@ -121,7 +121,7 @@ impl App {
                     ..
                 }
                 | KeyEvent {
-                    code: event::KeyCode::Char('C'),
+                    code: event::KeyCode::Char('c'),
                     modifiers: event::KeyModifiers::CONTROL,
                     ..
                 }
@@ -133,6 +133,7 @@ impl App {
                 }
                 KeyEvent {
                     code: event::KeyCode::Char(' '),
+                    kind: event::KeyEventKind::Press,
                     ..
                 } => match &self.status {
                     Status::Pause(previous_state) => self.status = *previous_state.clone(),
