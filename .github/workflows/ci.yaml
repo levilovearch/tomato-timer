@@ -42,7 +42,7 @@ jobs:
 
     - name: Check Lockfile
       run: |
-        cargo update --locked
+        cargo update --offline
 
     - name: Test
       run: cargo test --all
