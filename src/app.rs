@@ -22,6 +22,7 @@ enum Status {
     Work,
     Break,
     Pause(Box<Status>),
+    Done,
 }
 
 impl Status {
@@ -30,6 +31,7 @@ impl Status {
             Self::Work => Color::Cyan,
             Self::Break => Color::Magenta,
             Self::Pause(_) => Color::Gray,
+            Self::Done => Color::LightGreen,
         }
     }
     pub fn pasued(&self) -> bool {
@@ -62,21 +64,37 @@ impl App {
         }
     }
     fn render(&mut self) -> Result<()> {
-        self.terminal.draw(|f| {
-            let minutes = self.left_seconds / 60;
-            let seconds = self.left_seconds % 60;
-            let block_string = to_block_string(&format!("{:02}:{:02}", minutes, seconds));
-            let text = Text::raw(block_string);
-            let text_height = text.height() as u16;
-            let style = Style::default().fg(self.status.color());
-            let paragraph = Paragraph::new(text)
-                .alignment(Alignment::Center)
-                .style(style);
-            let size = f.size();
-            let y = (size.height - text_height) / 2;
-            let rect = Rect::new(0, y, size.width, text_height);
-            f.render_widget(paragraph, rect);
-        })?;
+        if self.status == Status::Done {
+            self.terminal.draw(|f| {
+                let block_string = to_block_string("DONE!");
+                let text = Text::raw(block_string);
+                let text_height = text.height() as u16;
+                let style = Style::default().fg(self.status.color());
+                let paragraph = Paragraph::new(text)
+                    .alignment(Alignment::Center)
+                    .style(style);
+                let size = f.size();
+                let y = (size.height - text_height) / 2;
+                let rect = Rect::new(0, y, size.width, text_height);
+                f.render_widget(paragraph, rect);
+            })?;
+        } else {
+            self.terminal.draw(|f| {
+                let minutes = self.left_seconds / 60;
+                let seconds = self.left_seconds % 60;
+                let block_string = to_block_string(&format!("{:02}:{:02}", minutes, seconds));
+                let text = Text::raw(block_string);
+                let text_height = text.height() as u16;
+                let style = Style::default().fg(self.status.color());
+                let paragraph = Paragraph::new(text)
+                    .alignment(Alignment::Center)
+                    .style(style);
+                let size = f.size();
+                let y = (size.height - text_height) / 2;
+                let rect = Rect::new(0, y, size.width, text_height);
+                f.render_widget(paragraph, rect);
+            })?;
+        }
         Ok(())
     }
     fn notify(&mut self) -> Result<()> {
@@ -86,7 +104,7 @@ impl App {
                 self.left_seconds = self.schedule.break_time * 60;
                 notify("Your work time is up, take a break!");
                 if self.schedule.repeats == 1 {
-                    quit(0)?;
+                    self.status = Status::Done;
                 }
             }
             Status::Break => {
